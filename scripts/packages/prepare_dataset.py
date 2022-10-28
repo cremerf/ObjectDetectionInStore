@@ -12,7 +12,7 @@ BUCKET_PREFIX = os.getenv('BUCKET_PREFIX')
 
 DATA_FOLDER = os.getenv('LOCATION_DIR')
 OUTPUT_DATA_FOLDER = os.getenv('OUTPUT_DATA_FOLDER')
-OUTPUT_DATA_BB_FOLDER = os.getenv('OUTPUT_DATA_FOLDER')
+OUTPUT_DATA_BB_FOLDER = os.getenv('OUTPUT_DATA_BB_FOLDER')
 
 
 def download_data_set(AWS_ACCESS_KEY_ID:str, AWS_SECRET_ACCESS_KEY:str, BUCKET_NAME:str, BUCKET_PREFIX:str, DATA_FOLDER:str) -> None:
@@ -103,27 +103,19 @@ def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str):
                 # Crear la carpeta data_v1
             if not os.path.exists(OUTPUT_DATA_FOLDER):
                 os.makedirs(OUTPUT_DATA_FOLDER)
-                print(OUTPUT_DATA_FOLDER)
                 
-                # Crear la carpeta test/train/val
-                
-            subset_folder_path = os.path.join(OUTPUT_DATA_FOLDER,subset)
-            
-            
-            #Link the image to dst
+            subset_folder_path = os.path.join(OUTPUT_DATA_FOLDER, subset)
+
+            #Link the image to dst if the folder directory is not present then create it
             if not os.path.exists(subset_folder_path):
-                # if the folder directory is not present 
-                # then create it.
                 os.makedirs(subset_folder_path)
-                print(subset_folder_path)
-            
-            src= os.path.join(DATA_FOLDER, filename) # data/train_02.jpg
+
+            src = os.path.join(DATA_FOLDER, filename) # data/train_02.jpg
             dst = os.path.join(subset_folder_path , filename) # data/data_v1/train/train_02.jpg
                 
             if not os.path.exists(dst):
                 # Move file
                 os.link(src, dst)
-                print(dst)
 
 
 def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_FOLDER: str, subset: str):
@@ -134,12 +126,21 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
     # get list of filenames
     filenames = data['image_name'].unique().tolist()
 
-
     # path for train/test/val inside data_v1
     folder_path = os.path.join(OUTPUT_DATA_FOLDER, subset)
+    print(f'Ruta de {OUTPUT_DATA_FOLDER} + {subset} = {folder_path}')
+
+    # path for data_v1/data_bb
+    folder_path_bb = os.path.join(OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER)
+    print(f'Ruta de {OUTPUT_DATA_FOLDER} + {OUTPUT_DATA_BB_FOLDER} = {folder_path_bb}')
+
+    # if folder for data_v1/data_bb is not present, create it.
+    if not os.path.exists(folder_path_bb):
+        os.mkdir(folder_path_bb)
 
     # path for train/test/val inside data_v1/data_bb
-    folder_path_final = os.path.join(OUTPUT_DATA_BB_FOLDER, subset)
+    folder_path_final = os.path.join(folder_path_bb, subset)
+    print(f'Ruta de {folder_path_bb} + {subset} = {folder_path_final}')
 
     # if the folder directory is not present then create it.
     if not os.path.exists(folder_path_final):
@@ -188,10 +189,13 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
                 # plot the rectangle over the image
                 image = cv2.rectangle(image, start_point, end_point, color, thickness)
 
-                # save the img
-                cv2.imwrite(image_path, image)
+            # save the img
+            cv2.imwrite(image_path_bb, image)
+
+    def resizing_images():
 
 
+        None
 
 def run():
 
