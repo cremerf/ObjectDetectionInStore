@@ -128,19 +128,48 @@ def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, IMAGES_FOLDER: str
 
 def from_csv_to_txt(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, LABELS_FOLDER: str, subset: str):
 
+    # create path: data/labels
     labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
 
     if not os.path.exists(labels_folder_path):
         os.makedirs(labels_folder_path)
 
+    # create path: data/labels/train
     subset_labels_folder_path = os.path.join(labels_folder_path, subset)
 
-    if not os.path.exists(labels_folder_path):
-        os.makedirs(labels_folder_path)
+    if not os.path.exists(subset_labels_folder_path):
+        os.makedirs(subset_labels_folder_path)
 
     data = pd.read_csv(f'{DATA_FOLDER}/annotations_{subset}.csv', names=["image_name", "x1", "y1", "x2", "y2","class", "image_width", "image_height" ])
 
+    print_buffer = []
 
+    # For each bounding box
+    for idx in data.index:
+
+        # Transform the bbox co-ordinates as per the format required by YOLO v5
+        b_center_x = (data.iloc[idx]["x1"] + data.iloc[idx]["x2"]) / 2 
+        b_center_y = (data.iloc[idx]["y1"] + data.iloc[idx]["y2"]) / 2
+        b_width    = (data.iloc[idx]["x2"] - data.iloc[idx]["x1"])
+        b_height   = (data.iloc[idx]["y2"] - data.iloc[idx]["y1"])
+
+        # Normalise the co-ordinates by the dimensions of the image
+        image_w = data.iloc[idx]["image_width"]
+        image_h= data.iloc[idx]["image_height"]
+        image_c = data.iloc[idx]["class"]
+        b_center_x /= image_w 
+        b_center_y /= image_h 
+        b_width    /= image_w 
+        b_height   /= image_h 
+
+        #Write the bbox details to the file 
+        print_buffer.append("{} {:.3f} {:.3f} {:.3f} {:.3f}".format(idx, b_center_x, b_center_y, b_width, b_height))
+
+        # Name of the file which we have to save 
+        save_file_name = os.path.join(subset_labels_folder_path, data.iloc[idx]["image_name"].replace("jpg", "txt"))
+        print(save_file_name)
+        # Save the annotation to disk
+        print("\n".join(print_buffer), file= open(save_file_name, "w"))
 
 
 
@@ -226,23 +255,28 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
 
 def run():
 
-    download_data_set(
-        AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID, 
-        AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY, 
-        BUCKET_NAME= BUCKET_NAME, 
-        BUCKET_PREFIX = BUCKET_PREFIX,
-        DATA_FOLDER = DATA_FOLDER)
+    #download_data_set(
+        #AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID, 
+        #AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY, 
+        #BUCKET_NAME= BUCKET_NAME, 
+        #BUCKET_PREFIX = BUCKET_PREFIX,
+        #DATA_FOLDER = DATA_FOLDER)
 
-    split_data_set(DATA_FOLDER= DATA_FOLDER, OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER)
+    #split_data_set(DATA_FOLDER= DATA_FOLDER, OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER)
 
     subset_train = 'train'
-    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_train)
+    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_train)
 
-    subset_val = 'val'
-    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_val)
+    #subset_val = 'val'
+    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_val)
 
-    subset_test = 'test'
-    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
+    #subset_test = 'test'
+    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
+
+    from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_train)
+
+
+
 
 def main_prepare_datasets():
     run()
