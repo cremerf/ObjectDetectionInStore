@@ -14,6 +14,9 @@ DATA_FOLDER = os.getenv('LOCATION_DIR')
 OUTPUT_DATA_FOLDER = os.getenv('OUTPUT_DATA_FOLDER')
 OUTPUT_DATA_BB_FOLDER = os.getenv('OUTPUT_DATA_BB_FOLDER')
 
+LABELS_FOLDER = os.getenv('LABELS_FOLDER')
+IMAGES_FOLDER = os.getenv('IMAGES_FOLDER')
+
 
 def download_data_set(AWS_ACCESS_KEY_ID:str, AWS_SECRET_ACCESS_KEY:str, BUCKET_NAME:str, BUCKET_PREFIX:str, DATA_FOLDER:str) -> None:
     """
@@ -72,7 +75,7 @@ def walkdir(DATA_FOLDER: str):
 
 
 
-def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str):
+def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, IMAGES_FOLDER: str):
     """
     Split train/val/test samples images and save in respective folder. 
 
@@ -100,22 +103,46 @@ def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str):
                 subset='train'
             elif filename.startswith("val"):
                 subset='val'
-                # Crear la carpeta data_v1
+                # Crear la carpeta data
             if not os.path.exists(OUTPUT_DATA_FOLDER):
                 os.makedirs(OUTPUT_DATA_FOLDER)
-                
-            subset_folder_path = os.path.join(OUTPUT_DATA_FOLDER, subset)
+            
+            images_folder_path = os.path.join(OUTPUT_DATA_FOLDER, IMAGES_FOLDER)
 
-            #Link the image to dst if the folder directory is not present then create it
-            if not os.path.exists(subset_folder_path):
-                os.makedirs(subset_folder_path)
+            # Create data/images/{subset} if not exists.
+            if not os.path.exists(images_folder_path):
+                os.makedirs(images_folder_path)
+
+            images_subset_folder_path = os.path.join(images_folder_path, subset)
+
+            # Create data/images/{subset} if not exists.
+            if not os.path.exists(images_subset_folder_path):
+                os.makedirs(images_subset_folder_path)
 
             src = os.path.join(DATA_FOLDER, filename) # data/train_02.jpg
-            dst = os.path.join(subset_folder_path , filename) # data/data_v1/train/train_02.jpg
+            dst = os.path.join(images_subset_folder_path , filename) # data/images/train/train_02.jpg
                 
             if not os.path.exists(dst):
                 # Move file
                 os.link(src, dst)
+
+def from_csv_to_txt(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, LABELS_FOLDER: str, subset: str):
+
+    labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
+
+    if not os.path.exists(labels_folder_path):
+        os.makedirs(labels_folder_path)
+
+    subset_labels_folder_path = os.path.join(labels_folder_path, subset)
+
+    if not os.path.exists(labels_folder_path):
+        os.makedirs(labels_folder_path)
+
+    data = pd.read_csv(f'{DATA_FOLDER}/annotations_{subset}.csv', names=["image_name", "x1", "y1", "x2", "y2","class", "image_width", "image_height" ])
+
+
+
+
 
 
 def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_FOLDER: str, subset: str):
