@@ -130,4 +130,5 @@ dmypy.json
 data_downloaded/
 data/
 data_v1/
+data_bb/
 

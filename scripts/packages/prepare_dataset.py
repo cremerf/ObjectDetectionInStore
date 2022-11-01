@@ -10,7 +10,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 BUCKET_PREFIX = os.getenv('BUCKET_PREFIX')
 
-DATA_FOLDER = os.getenv('LOCATION_DIR')
+DATA_FOLDER = os.getenv('LOCATION_DIR') # data_downloaded
 OUTPUT_DATA_FOLDER = os.getenv('OUTPUT_DATA_FOLDER')
 OUTPUT_DATA_BB_FOLDER = os.getenv('OUTPUT_DATA_BB_FOLDER')
 
@@ -44,6 +44,7 @@ def download_data_set(AWS_ACCESS_KEY_ID:str, AWS_SECRET_ACCESS_KEY:str, BUCKET_N
 
     s3_resource = boto3.resource('s3',aws_access_key_id=AWS_ACCESS_KEY_ID,aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_resource.Bucket(BUCKET_NAME)
+
     if not os.path.exists(DATA_FOLDER):
         os.makedirs(DATA_FOLDER)
         for object_summary in bucket.objects.filter(Prefix=BUCKET_PREFIX):
@@ -103,13 +104,14 @@ def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, IMAGES_FOLDER: str
                 subset='train'
             elif filename.startswith("val"):
                 subset='val'
-                # Crear la carpeta data
+
+            # Crear la carpeta data
             if not os.path.exists(OUTPUT_DATA_FOLDER):
                 os.makedirs(OUTPUT_DATA_FOLDER)
             
             images_folder_path = os.path.join(OUTPUT_DATA_FOLDER, IMAGES_FOLDER)
 
-            # Create data/images/{subset} if not exists.
+            # Create data/images if not exists.
             if not os.path.exists(images_folder_path):
                 os.makedirs(images_folder_path)
 
@@ -171,7 +173,7 @@ def from_csv_to_txt(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, LABELS_FOLDER: st
         # Save the annotation to disk
         print("\n".join(print_buffer), file= open(save_file_name, "w"))
 
-
+        "https://medium.com/@najari.vahab/parallel-computing-in-r-and-python-1c916a2803d7"
 
 
 def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_FOLDER: str, subset: str):
@@ -182,19 +184,19 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
     # get list of filenames
     filenames = data['image_name'].unique().tolist()
 
-    # path for train/test/val inside data_v1
+    # path for data/train
     folder_path = os.path.join(OUTPUT_DATA_FOLDER, subset)
     print(f'Ruta de {OUTPUT_DATA_FOLDER} + {subset} = {folder_path}')
 
-    # path for data_v1/data_bb
-    folder_path_bb = os.path.join(OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER)
-    print(f'Ruta de {OUTPUT_DATA_FOLDER} + {OUTPUT_DATA_BB_FOLDER} = {folder_path_bb}')
+    # path for data_bb
+    folder_path_bb = os.path.join(OUTPUT_DATA_BB_FOLDER)
+    print(f'Ruta de {OUTPUT_DATA_BB_FOLDER} = {folder_path_bb}')
 
-    # if folder for data_v1/data_bb is not present, create it.
+    # if folder for data_bb is not present, create it.
     if not os.path.exists(folder_path_bb):
         os.mkdir(folder_path_bb)
 
-    # path for train/test/val inside data_v1/data_bb
+    # path for data_bb/train
     folder_path_final = os.path.join(folder_path_bb, subset)
     print(f'Ruta de {folder_path_bb} + {subset} = {folder_path_final}')
 
@@ -255,27 +257,27 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
 
 def run():
 
-    #download_data_set(
-        #AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID, 
-        #AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY, 
-        #BUCKET_NAME= BUCKET_NAME, 
-        #BUCKET_PREFIX = BUCKET_PREFIX,
-        #DATA_FOLDER = DATA_FOLDER)
+    download_data_set(
+        AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID, 
+        AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY, 
+        BUCKET_NAME= BUCKET_NAME, 
+        BUCKET_PREFIX = BUCKET_PREFIX,
+        DATA_FOLDER = DATA_FOLDER)
 
-    #split_data_set(DATA_FOLDER= DATA_FOLDER, OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER)
+    split_data_set(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER, IMAGES_FOLDER = IMAGES_FOLDER)
 
     subset_train = 'train'
-    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_train)
+    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_train)
 
-    #subset_val = 'val'
-    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_val)
+    subset_val = 'val'
+    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_val)
 
-    #subset_test = 'test'
-    #plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
+    subset_test = 'test'
+    plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
 
-    from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_train)
-
-
+    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_train)
+    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_val)
+    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_test)
 
 
 def main_prepare_datasets():
