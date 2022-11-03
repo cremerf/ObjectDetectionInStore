@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import boto3
 import pandas as pd
 import cv2
+import multiprocessing
+from functools import partial
 load_dotenv()
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -124,11 +126,11 @@ def split_data_set(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, IMAGES_FOLDER: str
             src = os.path.join(DATA_FOLDER, filename) # data/train_02.jpg
             dst = os.path.join(images_subset_folder_path , filename) # data/images/train/train_02.jpg
                 
-            if not os.path.exists(dst):
+            if not os.path.exists(dst): # y no esta corrupta la imagen -> if not imagen_corrupta:
                 # Move file
                 os.link(src, dst)
 
-def from_csv_to_txt(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, LABELS_FOLDER: str, subset: str):
+def create_labels_dir(OUTPUT_DATA_FOLDER:str , LABELS_FOLDER:str, subset: str):
 
     # create path: data/labels
     labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
@@ -142,39 +144,57 @@ def from_csv_to_txt(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, LABELS_FOLDER: st
     if not os.path.exists(subset_labels_folder_path):
         os.makedirs(subset_labels_folder_path)
 
-    data = pd.read_csv(f'{DATA_FOLDER}/annotations_{subset}.csv', names=["image_name", "x1", "y1", "x2", "y2","class", "image_width", "image_height" ])
+def from_csv_to_list(filename: str, DATA_FOLDER:str, subset: str):
 
-    print_buffer = []
+    df_annotations = pd.read_csv(f'{DATA_FOLDER}/annotations_{subset}.csv', names=["image_name", "x1", "y1", "x2", "y2","class", "image_width", "image_height"])
 
-    # For each bounding box
-    for idx in data.index:
+    list_normalize_coord = []
+    starter = 0
 
-        # Transform the bbox co-ordinates as per the format required by YOLO v5
-        b_center_x = (data.iloc[idx]["x1"] + data.iloc[idx]["x2"]) / 2 
-        b_center_y = (data.iloc[idx]["y1"] + data.iloc[idx]["y2"]) / 2
-        b_width    = (data.iloc[idx]["x2"] - data.iloc[idx]["x1"])
-        b_height   = (data.iloc[idx]["y2"] - data.iloc[idx]["y1"])
+    for i in df_annotations.loc[df_annotations['image_name'] == filename].values:
+        
+        b_center_x = (i[1] + i[3]) / 2 
+        b_center_y = (i[2] + i[4]) / 2
+        b_width    = (i[3] - i[1])
+        b_height   = (i[4] - i[2])
 
         # Normalise the co-ordinates by the dimensions of the image
-        image_w = data.iloc[idx]["image_width"]
-        image_h= data.iloc[idx]["image_height"]
-        image_c = data.iloc[idx]["class"]
+        image_w = i[6]
+        image_h= i[7]
+        image_c = i[5]
         b_center_x /= image_w 
         b_center_y /= image_h 
         b_width    /= image_w 
-        b_height   /= image_h 
+        b_height   /= image_h
+        
+        starter += 1
+    
+        list_normalize_coord.append("{} {:.3f} {:.3f} {:.3f} {:.3f}".format(starter, b_center_x, b_center_y, b_width, b_height))
+    
+    return list_normalize_coord
 
-        #Write the bbox details to the file 
-        print_buffer.append("{} {:.3f} {:.3f} {:.3f} {:.3f}".format(idx, b_center_x, b_center_y, b_width, b_height))
+def get_txt_normalized_coords(subset:str, subset_labels_folder_path:str, filename:str):
 
-        # Name of the file which we have to save 
-        save_file_name = os.path.join(subset_labels_folder_path, data.iloc[idx]["image_name"].replace("jpg", "txt"))
-        print(save_file_name)
-        # Save the annotation to disk
-        print("\n".join(print_buffer), file= open(save_file_name, "w"))
+    list_normalize_coord = from_csv_to_list(filename= filename, DATA_FOLDER= DATA_FOLDER, subset= subset)
 
-        "https://medium.com/@najari.vahab/parallel-computing-in-r-and-python-1c916a2803d7"
+    path_to_file = os.path.join(subset_labels_folder_path, filename).replace("jpg", "txt")
 
+    with open(path_to_file, 'w') as f:
+        f.write("\n".join(list_normalize_coord))
+
+def get_list_of_filenames(DATA_FOLDER: str, subset: str):
+
+    list_of_filenames = []
+
+    list_of_dirs = walkdir(DATA_FOLDER)
+
+    for files in list_of_dirs:
+        if files[1].lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+            if files[1].startswith(subset):
+                print(files[1])
+                list_of_filenames.append(files[1])
+    
+    return list_of_filenames
 
 def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_FOLDER: str, subset: str):
 
@@ -182,7 +202,7 @@ def plot_bounding_box(DATA_FOLDER: str, OUTPUT_DATA_FOLDER: str, OUTPUT_DATA_BB_
     data = pd.read_csv(f'{DATA_FOLDER}/annotations_{subset}.csv', names=["image_name", "x1", "y1", "x2", "y2","class", "image_width", "image_height" ])
 
     # get list of filenames
-    filenames = data['image_name'].unique().tolist()
+    filenames = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset)
 
     # path for data/train
     folder_path = os.path.join(OUTPUT_DATA_FOLDER, subset)
@@ -266,19 +286,48 @@ def run():
 
     split_data_set(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER, IMAGES_FOLDER = IMAGES_FOLDER)
 
+    # ----TRAIN SAMPLES----
     subset_train = 'train'
+    # Plot BB in train samples -> sobre datos limpios
     plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_train)
 
+    # Generate TXT with normalized bounding box coordinates
+    list_of_filenames = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_train)
+    pool = multiprocessing.Pool()
+    labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
+    subset_labels_folder_path = os.path.join(labels_folder_path, subset_train)
+    func = partial(get_txt_normalized_coords, subset_train, subset_labels_folder_path)
+    pool.map(func, list_of_filenames)
+    pool.close()
+    pool.join()
+
+    # ----VAL SAMPLES----
     subset_val = 'val'
+    # Plot BB in val samples
     plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_val)
 
+    # Generate TXT with normalized bounding box coordinates
+    list_of_filenames = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_val)
+    pool = multiprocessing.Pool()
+    labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
+    subset_labels_folder_path = os.path.join(labels_folder_path, subset_val)
+    func = partial(get_txt_normalized_coords, subset_val, subset_labels_folder_path)
+    pool.map(func, list_of_filenames)
+    pool.close()
+    pool.join()
+
+    # ----TEST SAMPLES----
     subset_test = 'test'
+    # Plot BB in test samples
     plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
-
-    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_train)
-    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_val)
-    #from_csv_to_txt(DATA_FOLDER=DATA_FOLDER , OUTPUT_DATA_FOLDER=OUTPUT_DATA_FOLDER , LABELS_FOLDER=LABELS_FOLDER , subset=subset_test)
-
+    list_of_filenames = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_val)
+    pool = multiprocessing.Pool()
+    labels_folder_path = os.path.join(OUTPUT_DATA_FOLDER, LABELS_FOLDER)
+    subset_labels_folder_path = os.path.join(labels_folder_path, subset_val)
+    func = partial(get_txt_normalized_coords, subset_val, subset_labels_folder_path)
+    pool.map(func, list_of_filenames)
+    pool.close()
+    pool.join()
 
 def main_prepare_datasets():
     run()
