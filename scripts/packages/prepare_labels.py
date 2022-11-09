@@ -53,8 +53,6 @@ def from_csv_to_list(filename: str, DATA_FOLDER:str, subset: str):
         b_center_y /= image_h 
         b_width    /= image_w 
         b_height   /= image_h
-        
-        starter += 1
     
         list_normalize_coord.append("{} {:.3f} {:.3f} {:.3f} {:.3f}".format(starter, b_center_x, b_center_y, b_width, b_height))
     

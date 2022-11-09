@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 import boto3
 import pandas as pd
 import cv2
-import multiprocessing
-from functools import partial
 load_dotenv()
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -247,7 +245,6 @@ def run():
     # Plot BB in test samples
     subset_test = 'test'
     plot_bounding_box(DATA_FOLDER = DATA_FOLDER, OUTPUT_DATA_FOLDER= OUTPUT_DATA_FOLDER, OUTPUT_DATA_BB_FOLDER = OUTPUT_DATA_BB_FOLDER, subset= subset_test)
-
 
 
 def main_prepare_datasets():
