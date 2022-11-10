@@ -131,4 +131,5 @@ data_downloaded/
 data/
 data_v1/
 data_bb/
+prepare_train/yolov5/
 

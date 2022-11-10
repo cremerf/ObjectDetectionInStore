@@ -11,3 +11,16 @@
     2.1) api / model / tests / upload / stress_test
 
 3) 
+
+
+Run docker
+
+docker build -t prepare_train .            
+
+sudo gpasswd -a $eudesz docker
+
+sudo docker run --rm --net host -it\
+    -v $(pwd):/home/src/prepare_train \
+    --workdir /home/src/prepare_train \
+    402c17b27cca \
+    bash
