@@ -1,7 +1,9 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+# Builds ultralytics/yolov5:latest image on DockerHub https://hub.docker.com/r/ultralytics/yolov5
+# Image is CUDA-optimized for YOLOv5 single/multi-GPU training and inference
 
 # Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:22.04-py3
+FROM nvcr.io/nvidia/pytorch:22.10-py3
 RUN rm -rf /opt/pytorch  # remove 1.2GB dir
 
 # Downloads to user config dir
@@ -12,18 +14,20 @@ RUN apt update && apt install --no-install-recommends -y zip htop screen libgl1-
 
 # Install pip packages
 COPY requirements.txt .
-RUN mkdir -p /home/src/app
-RUN git clone https://github.com/ultralytics/yolov5 /home/src/yolov5
-RUN python -m pip install --upgrade pip
-RUN pip uninstall -y torch torchvision torchtext Pillow
-RUN pip install --no-cache -r requirements.txt albumentations wandb gsutil notebook Pillow>=9.1.0 \
-    torch torchvision --extra-index-url https://download.pytorch.org/whl/cu113
+RUN python -m pip install --upgrade pip wheel
+RUN pip uninstall -y Pillow torchtext  # torch torchvision
+RUN pip install --no-cache -r requirements.txt ultralytics albumentations comet gsutil notebook Pillow>=9.1.0 \
+    'opencv-python<4.6.0.66' \
+    --extra-index-url https://download.pytorch.org/whl/cu113
 
 # Create working directory
-WORKDIR /usr/src/app
+RUN mkdir -p /home/src/app
+WORKDIR /home/src/app
 
 # Copy contents
-COPY . /home/src/app
+# (issues as not a .git directory)
+COPY . /home/src/app/
+RUN git clone https://github.com/ultralytics/yolov5 /home/src/yolov5
 
 # Set environment variables
 ENV OMP_NUM_THREADS=8
@@ -46,11 +50,8 @@ ENV OMP_NUM_THREADS=8
 # Kill all image-based
 # sudo docker kill $(sudo docker ps -qa --filter ancestor=ultralytics/yolov5:latest)
 
-# Bash into running container
-# sudo docker exec -it 5a9b5863d93d bash
-
-# Bash into stopped container
-# id=$(sudo docker ps -qa) && sudo docker start $id && sudo docker exec -it $id bash
+# DockerHub tag update
+# t=ultralytics/yolov5:latest tnew=ultralytics/yolov5:v6.2 && sudo docker pull $t && sudo docker tag $t $tnew && sudo docker push $tnew
 
 # Clean up
 # docker system prune -a --volumes
@@ -62,4 +63,4 @@ ENV OMP_NUM_THREADS=8
 # python -m torch.distributed.run --nproc_per_node 2 --master_port 1 train.py --epochs 3
 
 # GCP VM from Image
-# docker.io/ultralytics/yolov5:latest
+# docker.io/ultralytics/yolov5:lates

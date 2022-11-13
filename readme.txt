@@ -15,12 +15,14 @@
 
 Run docker
 
-docker build -t prepare_train .            
 
-sudo gpasswd -a $eudesz docker
+docker build -t preparation .            
 
-sudo docker run --rm --net host -it\
-    -v $(pwd):/home/src/prepare_train \
-    --workdir /home/src/prepare_train \
-    402c17b27cca \
+sudo gpasswd -a $cremerf docker
+
+docker run --rm --net host --gpus all -it \
+    -v $(pwd):/home/src/app \
+    -v /home/cremerf/FinalProject/data:/home/src/data \
+    --workdir /home/src \
+    preparation \
     bash
