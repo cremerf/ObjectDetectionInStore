@@ -1,8 +1,7 @@
-# YOLOv5 by Ultralytics, GPL-3.0 license
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 
 # Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 FROM nvcr.io/nvidia/pytorch:22.04-py3
-
 RUN rm -rf /opt/pytorch  # remove 1.2GB dir
 
 # Downloads to user config dir
@@ -12,22 +11,20 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 RUN apt update && apt install --no-install-recommends -y zip htop screen libgl1-mesa-glx
 
 # Install pip packages
-COPY yolov5/requirements.txt .
+COPY requirements.txt .
+RUN mkdir -p /home/src/app
+RUN git clone https://github.com/ultralytics/yolov5 /home/src/yolov5
 RUN python -m pip install --upgrade pip
 RUN pip uninstall -y torch torchvision torchtext Pillow
 RUN pip install --no-cache -r requirements.txt albumentations wandb gsutil notebook Pillow>=9.1.0 \
     torch torchvision --extra-index-url https://download.pytorch.org/whl/cu113
 
 # Create working directory
-RUN mkdir -p /home/src/prepare_train
-RUN mkdir -p /home/src/prepare_train/data
-WORKDIR /usr/src/prepare_train
+WORKDIR /usr/src/app
 
 # Copy contents
-COPY  /home/eudesz/final_project/data /usr/src/prepare_train/data
-COPY . /usr/src/prepare_train
-RUN git clone https://github.com/ultralytics/yolov5 /usr/src/prepare_train
-RUN pip install --no-cache -r requirements.txt
+COPY . /home/src/app
+
 # Set environment variables
 ENV OMP_NUM_THREADS=8
 
