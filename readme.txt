@@ -12,17 +12,25 @@
 
 3)  
 
-
 Run docker
-
 
 docker build -t preparation .            
 
 sudo gpasswd -a $cremerf docker
 
+para correr dentro de AWS:
+
 docker run --rm --net host --gpus all -it \
     -v $(pwd):/home/src/app \
     -v /home/cremerf/FinalProject/data:/home/src/data \
+    --workdir /home/src \
+    preparation \
+    bash
+
+para correr en mi local:
+
+docker run --rm --net host --gpus all -it \
+    -v $(pwd):/home/src/app \
     --workdir /home/src \
     preparation \
     bash
