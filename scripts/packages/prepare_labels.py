@@ -76,33 +76,42 @@ def run():
     subset_train = 'train'
     create_labels_dir(OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER, LABELS_FOLDER = LABELS_FOLDER, subset= subset_train)
     list_of_filenames_train = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_train)
-    pool = multiprocessing.Pool()
     subset_labels_folder_path = os.path.join(labels_folder_path, subset_train)
-    func = partial(get_txt_normalized_coords, subset_train, subset_labels_folder_path)
-    pool.map(func, list_of_filenames_train)
-    pool.close()
-    pool.join()
+    if not os.path.exists(subset_labels_folder_path):
+        pool = multiprocessing.Pool()
+        func = partial(get_txt_normalized_coords, subset_train, subset_labels_folder_path)
+        pool.map(func, list_of_filenames_train)
+        pool.close()
+        pool.join()
+    else:
+        print(f'Labels from {subset_train} have already been preprocessed!')
 
     subset_val = 'val'
     create_labels_dir(OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER, LABELS_FOLDER = LABELS_FOLDER, subset= subset_val)
     list_of_filenames_val = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_val)
-    pool = multiprocessing.Pool()
     subset_labels_folder_path = os.path.join(labels_folder_path, subset_val)
-    func = partial(get_txt_normalized_coords, subset_val, subset_labels_folder_path)
-    pool.map(func, list_of_filenames_val)
-    pool.close()
-    pool.join()
+    if not os.path.exists(subset_labels_folder_path):
+        pool = multiprocessing.Pool()
+        func = partial(get_txt_normalized_coords, subset_val, subset_labels_folder_path)
+        pool.map(func, list_of_filenames_val)
+        pool.close()
+        pool.join()
+    else:
+        print(f'Labels from {subset_val} have already been preprocessed!')
 
 
     subset_test = 'test'
     create_labels_dir(OUTPUT_DATA_FOLDER = OUTPUT_DATA_FOLDER, LABELS_FOLDER = LABELS_FOLDER, subset= subset_test)
     list_of_filenames_test = get_list_of_filenames(DATA_FOLDER= DATA_FOLDER, subset= subset_test)
-    pool = multiprocessing.Pool()
     subset_labels_folder_path = os.path.join(labels_folder_path, subset_test)
-    func = partial(get_txt_normalized_coords, subset_test, subset_labels_folder_path)
-    pool.map(func, list_of_filenames_test)
-    pool.close()
-    pool.join()
+    if not os.path.exists(subset_labels_folder_path):
+        pool = multiprocessing.Pool()
+        func = partial(get_txt_normalized_coords, subset_test, subset_labels_folder_path)
+        pool.map(func, list_of_filenames_test)
+        pool.close()
+        pool.join()
+    else:
+        print(f'Labels from {subset_test} have already been preprocessed!')
 
 def main_prepare_labels():
     run()

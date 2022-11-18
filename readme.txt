@@ -10,7 +10,7 @@
 
     2.1) api / model / tests / upload / stress_test
 
-3) 
+3)  
 
 
 Run docker
@@ -26,3 +26,10 @@ docker run --rm --net host --gpus all -it \
     --workdir /home/src \
     preparation \
     bash
+
+Para descargar algo del server a nuestro local:
+
+scp -i ~/.ssh/id_rsa cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
+
+
+scp -r cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
