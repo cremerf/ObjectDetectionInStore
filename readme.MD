@@ -10,24 +10,30 @@
 
     2.1) api / model / tests / upload / stress_test
 
-3)  
+## Run docker
 
-Run docker
+# Build image from folder
 
-docker build -t preparation .            
+docker build -t preparation_fc .            
 
 sudo gpasswd -a $cremerf docker
 
-para correr dentro de AWS:
+## Build container in AWS with image running
+
 
 docker run --rm --net host --gpus all -it \
-    -v $(pwd):/home/src/app \
+    -v /home/cremerf/FinalProject/training:/home/src/app \
+    -v /home/eudesz/final_project/data:/home/src/dataset \
     -v /home/cremerf/FinalProject/data:/home/src/data \
     --workdir /home/src \
-    preparation \
+    preparation_fc \
     bash
 
-para correr en mi local:
+
+
+
+
+## Build container in Local with image running
 
 docker run --rm --net host --gpus all -it \
     -v $(pwd):/home/src/app \
@@ -35,9 +41,16 @@ docker run --rm --net host --gpus all -it \
     preparation \
     bash
 
-Para descargar algo del server a nuestro local:
+## Download files from server into local folder
 
 scp -i ~/.ssh/id_rsa cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
 
 
 scp -r cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
+
+## Train model in container
+
+python3 train.py --img 416 --batch 4 --epochs 5 \
+    --data /home/src/app/config_blmodel.yaml \
+    --weights yolov5s.pt --cache --project /home/src/data \
+    --name first_training
