@@ -98,11 +98,15 @@ def get_neightbours(img_path:str):
 
 def bb_intersection_over_union(df_predictions: pd.DataFrame, index_a:int, index_b:int) -> float:
 
+        # para left w = -w y h = 0
+        # para right w = +w y h = 0
+        # para top w = 0 y h = + h
+
     a = index_a
-    xA1 = df_predictions.loc[a][0]-df_predictions.loc[a][2]/2
-    yA1 = df_predictions.loc[a][1]+df_predictions.loc[a][3]/2
-    xA2 = df_predictions.loc[a][0]+df_predictions.loc[a][2]/2
-    yA2 = df_predictions.loc[a][1]-df_predictions.loc[a][3]/2
+    xA1 = df_predictions.loc[a][0]-df_predictions.loc[a][2]/2 + w
+    yA1 = df_predictions.loc[a][1]+df_predictions.loc[a][3]/2 + h
+    xA2 = df_predictions.loc[a][0]+df_predictions.loc[a][2]/2 + w
+    yA2 = df_predictions.loc[a][1]-df_predictions.loc[a][3]/2 + h
     boxA = [xA1, yA1, xA2, yA2 ]
 
     b = index_b # indices vecinos detectados que estan en el diccionario
