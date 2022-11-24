@@ -1,0 +1,5 @@
+
+train: final_project/data/train
+val: final_project/data/test
+nc: 1
+names: ['object']

@@ -45,8 +45,13 @@ docker run --rm --net host --gpus all -it \
 
 scp -i ~/.ssh/id_rsa cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
 
+scp -i ~/.ssh/id_rsa cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data/first_training .
 
+## download data folder
 scp -r cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data .
+## download first training with weights folder
+scp -r cremerf@ec2-3-135-65-134.us-east-2.compute.amazonaws.com:/home/cremerf/FinalProject/data/first_training .
+
 
 ## Train model in container
 
