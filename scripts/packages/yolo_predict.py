@@ -38,15 +38,13 @@ class YOLO_Pred():
         self.yolo.setInput(blob)
         preds = self.yolo.forward() # detection or prediction from YOLO
 
-        labels = pd.DataFrame(preds[0])
-        labels.columns = ['Center_X','Center_Y','Width','Height', 'Confidence','ProbabilityScore']
-
         # Non Maximum Supression
         # step-1: filter detection based on confidence (0.4) and probability score (0.25)
         detections = preds[0]
         boxes = []
         confidences = []
         classes = []
+        box_preds=[]
 
         # widht and height of the image (input_image)
         image_w, image_h = input_image.shape[:2]
@@ -70,11 +68,13 @@ class YOLO_Pred():
                     height = int(h*y_factor)
                     
                     box = np.array([left,top,width,height])
-                    
+                    box_pred = np.array([cx,cy,w*x_factor,h*y_factor])
                     # append values into the list
                     confidences.append(confidence)
                     boxes.append(box)
                     classes.append(class_id)
+                    box_preds.append(box_pred)
+                    
                     
         # clean
         boxes_np = np.array(boxes).tolist()
@@ -83,9 +83,10 @@ class YOLO_Pred():
         # NMS
         index = np.array(cv2.dnn.NMSBoxes(boxes_np,confidences_np,0.25,0.45)).flatten()
 
-        labels = labels.iloc[index]
+        df_predictions = pd.DataFrame(box_preds)
+        df_predictions = df_predictions.iloc[index]
+        df_predictions.columns = ['Center_X','Center_Y','Width','Height']
 
-        '''
         # Draw the Bounding
         for ind in index:
             # extract bounding box
@@ -100,12 +101,14 @@ class YOLO_Pred():
             cv2.rectangle(image,(x,y),(x+w,y+h),colors,2)
             cv2.rectangle(image,(x,y-30),(x+w,y),colors,-1)
 
-            cv2.putText(image,text,(x,y-10),cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,0),1)
-            '''
+            cv2.putText(image,str(ind),(x,y-10),cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,0),1)
+        #cv2.imwrite(filename='test_neightbours.jpg',img=image)
+
+        df_predictions[['Width']] = df_predictions[['Width']]/x_factor
+        df_predictions[['Height']] = df_predictions[['Height']]/x_factor
             
-        return labels
-    
-    
+        return df_predictions  #, index, boxes_np
+
     def generate_colors(self,ID):
         np.random.seed(10)
         colors = np.random.randint(100,255,size=(self.nc,3)).tolist()
