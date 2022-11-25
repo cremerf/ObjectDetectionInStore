@@ -103,10 +103,10 @@ def bb_intersection_over_union(df_predictions: pd.DataFrame, index_a:int, index_
         # para top w = 0 y h = + h
 
     a = index_a
-    xA1 = df_predictions.loc[a][0]-df_predictions.loc[a][2]/2 + w
-    yA1 = df_predictions.loc[a][1]+df_predictions.loc[a][3]/2 + h
-    xA2 = df_predictions.loc[a][0]+df_predictions.loc[a][2]/2 + w
-    yA2 = df_predictions.loc[a][1]-df_predictions.loc[a][3]/2 + h
+    xA1 = df_predictions.loc[a][0]-df_predictions.loc[a][2]/2
+    yA1 = df_predictions.loc[a][1]+df_predictions.loc[a][3]/2
+    xA2 = df_predictions.loc[a][0]+df_predictions.loc[a][2]/2
+    yA2 = df_predictions.loc[a][1]-df_predictions.loc[a][3]/2
     boxA = [xA1, yA1, xA2, yA2 ]
 
     b = index_b # indices vecinos detectados que estan en el diccionario
@@ -143,8 +143,11 @@ def search_empty_bounding_box(df_predictions: pd.DataFrame, dict_of_neightbours:
 
 
 
+    pass
 
 
+
+run()
 
 
 
