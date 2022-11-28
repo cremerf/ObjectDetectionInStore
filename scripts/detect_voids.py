@@ -1,15 +1,12 @@
 from packages.yolo_predict import YOLO_Pred
 import pandas as pd
+import cv2
 
-#crear modulo con paths para weights + yaml 
-yolo = YOLO_Pred('/home/cremerf/FinalProject/data/first_training/weights/bestnoft.onnx', '/home/cremerf/FinalProject/data/config_blmodel.yaml')
 
-def get_neightbours(img_path:str):
+def get_neightbours(df_predictions:pd.DataFrame) -> list:
 
-    df_predictions = yolo.predictions(img_path=img_path)
-
-    dict_l_n = {  } # neigh left
-    dict_r_n = { } # neigh right
+    dict_l_n = {} # neigh left
+    dict_r_n = {} # neigh right
     dict_h_n= {}  # alone right
 
     for index_bb in df_predictions.index:
@@ -55,10 +52,6 @@ def get_neightbours(img_path:str):
             
             ### Search neig left
             if (x_min_l < X_center_neightbour < x_max_l and y_min_l < Y_center_neightbour < y_max_l )  :
-                None
-                if index_bb==694 and index==693:
-                    print(f'El bounding box {index_bb} tiene al bb {index} de vecino')
-                    print(x_min_l, X_center_neightbour, x_max_l, "___", y_min_l, Y_center_neightbour,y_max_l )
                 list_of_neightbours_l.append([index])
                 try:
                     dict_l_n[str(index_bb)].append(index)
@@ -67,9 +60,6 @@ def get_neightbours(img_path:str):
                     dict_l_n[str(index_bb)].append(index)
                 
             else:
-                if index_bb==288 and index==277:
-                    print(f'El bounding box {index_bb} no tiene vencidad con {index}')
-                    print(x_min_l, X_center_neightbour, x_max_l, "___", y_min_l, Y_center_neightbour,y_max_l )
                 list_of_alones_l.append([index])
             if (x_min_r < X_center_neightbour < x_max_r and y_min_r < Y_center_neightbour < y_max_r ):
                 list_of_neightbours_r.append([index])
@@ -79,11 +69,10 @@ def get_neightbours(img_path:str):
                     dict_r_n[str(index_bb)]=[]
                     dict_r_n[str(index_bb)].append(index)
             else:
-
                 list_of_alones_r.append([index_bb, index])
                 
             # Search neig hight    
-            if (x_min_h < X_center_neightbour < x_max_h and y_min_h < Y_center_neightbour < y_max_h ):
+            if (x_min_h < X_center_neightbour < x_max_h and y_min_h < Y_center_neightbour < y_max_h):
                 list_of_neightbours_h.append([index])
                 try:
                     dict_h_n[str(index_bb)].append(index)
@@ -95,59 +84,125 @@ def get_neightbours(img_path:str):
 
     return [dict_l_n, dict_r_n, dict_h_n]
 
+def search_voids_bb_neightbours(df_predictions: pd.DataFrame, img_path:str, dict_of_neightbours: dict,  neightbour:str=('left','right','up')):
+    
+    list_of_voids = []
 
-def bb_intersection_over_union(df_predictions: pd.DataFrame, index_a:int, index_b:int) -> float:
+    k = 0
+    z = 0
+    if neightbour == 'left':
+        k = -1
+        z = 0
+    elif neightbour == 'right':
+        k = 1
+        z = 0
+    else:
+        k = 0
+        z = -1
+    
+    image = cv2.imread(filename= img_path)
 
-        # para left w = -w y h = 0
-        # para right w = +w y h = 0
-        # para top w = 0 y h = + h
+    for index_a, index_b in dict_of_neightbours.items():
 
-    a = index_a
-    xA1 = df_predictions.loc[a][0]-df_predictions.loc[a][2]/2
-    yA1 = df_predictions.loc[a][1]+df_predictions.loc[a][3]/2
-    xA2 = df_predictions.loc[a][0]+df_predictions.loc[a][2]/2
-    yA2 = df_predictions.loc[a][1]-df_predictions.loc[a][3]/2
-    boxA = [xA1, yA1, xA2, yA2 ]
-
-    b = index_b # indices vecinos detectados que estan en el diccionario
-    xB1 = df_predictions.loc[b][0]-df_predictions.loc[b][2]/2
-    yB1 = df_predictions.loc[b][1]+df_predictions.loc[b][3]/2
-    xB2 = df_predictions.loc[b][0]+df_predictions.loc[b][2]/2
-    yB2 = df_predictions.loc[b][1]-df_predictions.loc[b][3]/2
-    boxB = [xB1, yB1,xB2, yB2 ]
-    # determine the (x, y)-coordinates of the intersection rectangle
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
+        h_image, w_image = image.shape[0:2] # obtengo limites de la imagen
+        w_index_a = df_predictions.loc[int(index_a)][2]
+        h_index_a = df_predictions.loc[int(index_a)][3]
 
 
-    # compute the area of intersection rectangle
-    interArea = (xB - xA) * (yB - yA)
+        # Virtual bounding box to evaluate neightbours 
+        xA1 = df_predictions.loc[int(index_a)][0] - df_predictions.loc[int(index_a)][2]/2 + (k * w_index_a) # Para izquierda: (-1) / Para derecha: 1 / Para arriba: 0
+        yA1 = df_predictions.loc[int(index_a)][1] - df_predictions.loc[int(index_a)][3]/2 + (z * h_index_a) # Para izquierda: 0 / Para derecha: 0 / Para arriba: (-1)
+        xA2 = df_predictions.loc[int(index_a)][0] + df_predictions.loc[int(index_a)][2]/2 + (k * w_index_a) # Para izquierda: (-1) / Para derecha: 1 / Para arriba: 0
+        yA2 = df_predictions.loc[int(index_a)][1] + df_predictions.loc[int(index_a)][3]/2 + (z * h_index_a) # Para izquierda: 0 / Para derecha: 0 / Para arriba: -1
+        boxA = [xA1, yA1, xA2, yA2]
 
-    # compute the area of both the prediction and ground-truth
-    # rectangles
-    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    boxBArea = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+        X_center_A = df_predictions.loc[int(index_a)][0] - k * df_predictions.loc[int(index_a)][2]  # Left X_center - Width  // Right X_center + Width
+        Y_center_A = df_predictions.loc[int(index_a)][1]  - k * df_predictions.loc[int(index_a)][2]  # Left Y_center - Width // Right Y_center + Width
 
-    # compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
-    iou = interArea / float(boxAArea + boxBArea - interArea)
+        print(f'Evaluating {index_a}...')
 
-    # return the intersection over union value
-    return iou
+        # Limits of the image
+        if 0 < xA1 < w_image and 0 < xA2 < w_image and 0 < yA1 < h_image and  0 < yA2 < h_image:
+                trigger = True
+                void_number = 0
 
-def search_empty_bounding_box(df_predictions: pd.DataFrame, dict_of_neightbours: dict):
+                # Iterate over each neightbour: neightbour vs virtual bounding box (index_a = which we are evaluating)
+                for item in index_b:
+                    
+                    first_list = []
+                    xB1 = df_predictions.loc[item][0] - df_predictions.loc[item][2]/2
+                    yB1 = df_predictions.loc[item][1] - df_predictions.loc[item][3]/2
+                    xB2 = df_predictions.loc[item][0] + df_predictions.loc[item][2]/2
+                    yB2 = df_predictions.loc[item][1] + df_predictions.loc[item][3]/2
+                    boxB = [xB1, yB1,xB2, yB2]
 
+                    xA = max(boxA[0], boxB[0])
+                    yA = max(boxA[1], boxB[1])
+                    xB = min(boxA[2], boxB[2])
+                    yB = min(boxA[3], boxB[3])
 
+                    interArea = (xB - xA) * (yB - yA)
 
+                    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+                    boxBArea = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
 
+                    iou = interArea / float(boxAArea + boxBArea - interArea)
+                    trigger = trigger and (iou < 0.1)
+                #print(f'Trigger: {trigger}')
+
+                if trigger == False:
+                    pass
+                    #print(f'No hay espacio vacio a la izquierda de {index_a}')
+                else:
+                    print(f'A la izquierda de {index_a} hay espacio vacio')
+                    void_number += 1
+                    void_text = f'{neightbour} void #{void_number}'
+                    first_list.append(index_a)
+                    first_list.append(void_text)
+                    first_list.append(X_center_A)
+                    first_list.append(Y_center_A)
+                    list_of_voids.append(first_list)
+                
+
+    return list_of_voids
+
+def df_voids():
+    pass
+
+def search_voids_no_neightbours():
     pass
 
 
+def run():
 
-run()
+    #crear modulo con paths para weights + yaml 
+
+    # Load model & YAML file
+    yolo = YOLO_Pred('/home/cremerf/FinalProject/data/first_training/weights/bestnoft.onnx', '/home/cremerf/FinalProject/data/config_blmodel.yaml')
+
+    # Como debe tomar el path para el ml_service?
+    img_path = '/home/cremerf/FinalProject/eudes-fede/test_imgs/test_7.jpg'
+    df_predictions = yolo.predictions(img_path=img_path)
+
+    # Get neightbours from 3 ways (right / left / up)
+    dict_l_n, dict_r_n, dict_h_n = get_neightbours(img_path= img_path, df_predictions= df_predictions)
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

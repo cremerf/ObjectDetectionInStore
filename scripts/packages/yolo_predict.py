@@ -85,7 +85,7 @@ class YOLO_Pred():
 
         df_predictions = pd.DataFrame(box_preds)
         df_predictions = df_predictions.iloc[index]
-        df_predictions.columns = ['Center_X','Center_Y','Width','Height']
+        df_predictions.columns = ['X_center','Y_center','Width','Height']
 
         # Draw the Bounding
         for ind in index:
