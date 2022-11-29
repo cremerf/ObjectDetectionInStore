@@ -162,7 +162,6 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, img_path:str, dict
                     first_list.append(X_center_A)
                     first_list.append(Y_center_A)
                     list_of_voids.append(first_list)
-                
 
     return list_of_voids
 
@@ -185,7 +184,7 @@ def run():
     df_predictions = yolo.predictions(img_path=img_path)
 
     # Get neightbours from 3 ways (right / left / up)
-    dict_l_n, dict_r_n, dict_h_n = get_neightbours(img_path= img_path, df_predictions= df_predictions)
+    dict_l_n
 
     
 
