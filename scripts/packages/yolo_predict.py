@@ -23,9 +23,8 @@ class YOLO_Pred():
         self.yolo.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 
-    def predictions(self,img_path:str) -> pd.DataFrame:
+    def predictions(self,image) -> pd.DataFrame:
         
-        image = cv2.imread(img_path)
         row, col, d = image.shape
         # get the YOLO prediction from the the image
         # step-1 convert image into square image (array)
