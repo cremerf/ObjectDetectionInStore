@@ -23,7 +23,7 @@ class YOLO_Pred():
         self.yolo.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 
-    def predictions(self,image) -> pd.DataFrame:
+    def predictions(self,image:np.ndarray) -> pd.DataFrame:
         
         row, col, d = image.shape
         # get the YOLO prediction from the the image

@@ -1,13 +1,13 @@
-from scripts.detect_voids import get_neightbours, search_voids_bb_neightbours
 from packages.yolo_predict import YOLO_Pred
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import cv2
 import multiprocessing
 from functools import partial
+import itertools
 
 
-def get_neightbours_test(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -> list:
+def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -> dict:
     """_summary_
 
     Args:
@@ -16,7 +16,7 @@ def get_neightbours_test(df_predictions:pd.DataFrame, neightbour:str, index_it:i
         index_it (int): _description_
 
     Returns:
-        list: _description_
+        dict: _description_
     """
 
     dict_of_neightbours = {} 
@@ -63,10 +63,10 @@ def get_neightbours_test(df_predictions:pd.DataFrame, neightbour:str, index_it:i
             if (x_min_l < X_center_neightbour < x_max_l and y_min_l < Y_center_neightbour < y_max_l )  :
                 list_of_neightbours_l.append([index_bb])
                 try:
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_l'].append(index_bb)
                 except KeyError:
-                    dict_of_neightbours[str(index_it)]= []
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_l']= []
+                    dict_of_neightbours[str(index_it)+'_l'].append(index_bb)
             else:
                 list_of_alones_l.append([index_bb])
 
@@ -82,10 +82,10 @@ def get_neightbours_test(df_predictions:pd.DataFrame, neightbour:str, index_it:i
             if (x_min_r < X_center_neightbour < x_max_r and y_min_r < Y_center_neightbour < y_max_r ):
                 list_of_neightbours_r.append([index_bb])
                 try:
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_r'].append(index_bb)
                 except KeyError:
-                    dict_of_neightbours[str(index_it)]= []
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_r']= []
+                    dict_of_neightbours[str(index_it)+'_r'].append(index_bb)
             else:
                 list_of_alones_r.append([index_it, index_bb])
 
@@ -100,39 +100,41 @@ def get_neightbours_test(df_predictions:pd.DataFrame, neightbour:str, index_it:i
             if (x_min_h < X_center_neightbour < x_max_h and y_min_h < Y_center_neightbour < y_max_h ):
                 list_of_neightbours_h.append([index_bb])
                 try:
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_h'].append(index_bb)
                 except KeyError:
-                    dict_of_neightbours[str(index_it)]= []
-                    dict_of_neightbours[str(index_it)].append(index_bb)
+                    dict_of_neightbours[str(index_it)+'_h']= []
+                    dict_of_neightbours[str(index_it)+'_h'].append(index_bb)
             else:
                 list_of_alones_h.append([index_it, index_bb])
 
     return dict_of_neightbours
 
-def search_voids_bb_neightbours(df_predictions: pd.DataFrame, dict_of_neightbours: dict, h_image:int, w_image:int, neightbour:str=('left','right','up')):
+def search_voids_bb_neightbours(df_predictions: pd.DataFrame, merged: list, h_image:int, w_image:int):
     
     list_of_voids = []
 
     k = 0
     z = 0
-    if neightbour == 'left':
-        k = -1
-        z = 0
-    elif neightbour == 'right':
-        k = 1
-        z = 0
-    else:
-        k = 0
-        z = -1
     
-
     # iterate over all dicts in list
-    for dic in dict_of_neightbours:
+    for dicts in merged:
 
         # iterate over key and value pairs of dict (index_a = key // index_b = value pair)
-        for index_a, index_b in dic.items():
+        for index_a, index_b in dicts.items():
 
+            if index_a[-1] == 'l':
+                k = -1
+                z = 0
+            elif index_a[-1] == 'r':
+                k = 1
+                z = 0
+            else:
+                k = 0
+                z = -1
 
+            index_a = index_a[0:-2]
+
+            #h_image, w_image = image.shape[0:2] # limits of the image
             w_index_a = df_predictions.loc[int(index_a)][2]
             h_index_a = df_predictions.loc[int(index_a)][3]
 
@@ -186,21 +188,22 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, dict_of_neightbour
                     else:
                         print(f'A la izquierda de {index_a} hay espacio vacio')
                         void_number += 1
-                        void_text = f'{neightbour} void #{void_number}'
+                        void_text = f'{index_a} void #{void_number}'
                         first_list.append(index_a)
                         first_list.append(void_text)
                         first_list.append(X_center_A)
                         first_list.append(Y_center_A)
+                        first_list.append(w_index_a)
+                        first_list.append(h_index_a)
                         list_of_voids.append(first_list)
                     
-
 
     return list_of_voids
 
 def df_voids():
     pass
 
-def search_voids_no_neightbours():
+def plot_voids_from_df():
     pass
 
 
@@ -220,16 +223,17 @@ def run():
     # Get neightbours from 3 ways (right / left / up)
     pool = multiprocessing.Pool()
     neightbour = 'left'
-    func = partial(get_neightbours_test, df_predictions, neightbour)
+    func = partial(get_neightbours, df_predictions, neightbour)
     dict_of_neightbours_left = pool.map(func, list(df_predictions.index))
     pool.close()
     pool.join()
 
+    # clean up empty positions
     dict_of_neightbours_left = list(filter(None, dict_of_neightbours_left))
 
     pool = multiprocessing.Pool()
     neightbour = 'right'
-    func = partial(get_neightbours_test, df_predictions, neightbour)
+    func = partial(get_neightbours, df_predictions, neightbour)
     dict_of_neightbours_right = pool.map(func, list(df_predictions.index))
     pool.close()
     pool.join()
@@ -238,21 +242,22 @@ def run():
 
     pool = multiprocessing.Pool()
     neightbour = 'up'
-    func = partial(get_neightbours_test, df_predictions, neightbour)
+    func = partial(get_neightbours, df_predictions, neightbour)
     dict_of_neightbours_up = pool.map(func, list(df_predictions.index))
     pool.close()
     pool.join()
 
     dict_of_neightbours_up = list(filter(None, dict_of_neightbours_up))
 
+    # Merged 3 separated list of dicts(left/right/high) into 1 list
+    dicts_neightbours = [dict_of_neightbours_left, dict_of_neightbours_right, dict_of_neightbours_up]
+    list_neightbours = list(itertools.chain.from_iterable(dicts_neightbours))
+
     # Get void neightbours 
-    list_of_voids_left = search_voids_bb_neightbours(df_predictions=df_predictions, dict_of_neightbours=dict_of_neightbours_left, h_image=h_image, w_image=w_image, neightbour='left')
-    list_of_voids_right = search_voids_bb_neightbours(df_predictions=df_predictions, dict_of_neightbours=dict_of_neightbours_right, h_image=h_image, w_image=w_image, neightbour='right')
-    list_of_voids_up = search_voids_bb_neightbours(df_predictions=df_predictions, dict_of_neightbours=dict_of_neightbours_up, h_image=h_image, w_image=w_image, neightbour='up')
+    list_of_voids = search_voids_bb_neightbours(df_predictions=df_predictions, merged_list=list_neightbours, h_image=h_image, w_image=w_image)
 
     # Create dataframe with data(X_center/Y_center/Label) of voids
-
-
+    df_voids = pd.DataFrame(list_of_voids, columns=['Neightbour','Label','X_center','Y_center','Width','Height'])
 
     # Plot voids on image
 
