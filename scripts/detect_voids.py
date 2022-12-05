@@ -57,8 +57,8 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
             x_min_l = X_center_0 - Width_0 - (a*threshold_x_0)
             x_max_l = X_center_0 - Width_0 + (k*threshold_x_0)
 
-            y_min_l = Y_center_0 - (k*threshold_y_0)
-            y_max_l = Y_center_0 + (k*threshold_y_0)
+            y_min_l = Y_center_0 - (k * threshold_y_0)
+            y_max_l = Y_center_0 + (k * threshold_y_0)
 
             if (x_min_l < X_center_neightbour < x_max_l and y_min_l < Y_center_neightbour < y_max_l )  :
                 list_of_neightbours_l.append([index_bb])
@@ -109,7 +109,18 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
 
     return dict_of_neightbours
 
-def search_voids_bb_neightbours(df_predictions: pd.DataFrame, merged: list, h_image:int, w_image:int):
+def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: list, h_image:int, w_image:int):
+    """_summary_
+
+    Args:
+        df_predictions (pd.DataFrame): _description_
+        list_of_dicts (list): _description_
+        h_image (int): _description_
+        w_image (int): _description_
+
+    Returns:
+        _type_: _description_
+    """
     
     list_of_voids = []
 
@@ -117,7 +128,7 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, merged: list, h_im
     z = 0
     
     # iterate over all dicts in list
-    for dicts in merged:
+    for dicts in list_of_dicts:
 
         # iterate over key and value pairs of dict (index_a = key // index_b = value pair)
         for index_a, index_b in dicts.items():
@@ -148,7 +159,7 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, merged: list, h_im
 
 
             X_center_A = df_predictions.loc[int(index_a)][0] - k * df_predictions.loc[int(index_a)][2]  # Left X_center - Width  // Right X_center + Width
-            Y_center_A = df_predictions.loc[int(index_a)][1]  - k * df_predictions.loc[int(index_a)][2]  # Left Y_center - Width // Right Y_center + Width
+            Y_center_A = df_predictions.loc[int(index_a)][1]  - k * df_predictions.loc[int(index_a)][3]  # Left Y_center - Width // Right Y_center + Width
 
             print(f'Evaluating {index_a}...')
             
@@ -191,8 +202,10 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, merged: list, h_im
                         void_text = f'{index_a} void #{void_number}'
                         first_list.append(index_a)
                         first_list.append(void_text)
-                        first_list.append(X_center_A)
-                        first_list.append(Y_center_A)
+                        first_list.append(xA1)
+                        first_list.append(yA1)
+                        first_list.append(xA2)
+                        first_list.append(yA2)
                         first_list.append(w_index_a)
                         first_list.append(h_index_a)
                         list_of_voids.append(first_list)
@@ -217,7 +230,7 @@ def run():
     # Como debe tomar el path para el ml_service?
     img_path = '/home/cremerf/FinalProject/eudes-fede/test_imgs/test_7.jpg'
     image = cv2.imread(img_path)
-    h_image, w_image = image.shape[0:2] # limits of the image
+    h_image, w_image = image.shape[0:2] # limits of the image ## OJO, ME PARECE QUE EL PRIMER VALOR ES EL WIDTH, NO EL HEIGHT
     df_predictions = yolo.predictions(image=image)
 
     # Get neightbours from 3 ways (right / left / up)
@@ -254,7 +267,7 @@ def run():
     list_neightbours = list(itertools.chain.from_iterable(dicts_neightbours))
 
     # Get void neightbours 
-    list_of_voids = search_voids_bb_neightbours(df_predictions=df_predictions, merged_list=list_neightbours, h_image=h_image, w_image=w_image)
+    list_of_voids = search_voids_bb_neightbours(df_predictions=df_predictions, list_of_dicts=list_neightbours, h_image=h_image, w_image=w_image)
 
     # Create dataframe with data(X_center/Y_center/Label) of voids
     df_voids = pd.DataFrame(list_of_voids, columns=['Neightbour','Label','X_center','Y_center','Width','Height'])

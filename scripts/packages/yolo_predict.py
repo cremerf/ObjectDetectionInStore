@@ -67,7 +67,7 @@ class YOLO_Pred():
                     height = int(h*y_factor)
                     
                     box = np.array([left,top,width,height])
-                    box_pred = np.array([cx,cy,w*x_factor,h*y_factor])
+                    box_pred = np.array([cx*x_factor,cy*y_factor,w*x_factor,h*y_factor])
                     # append values into the list
                     confidences.append(confidence)
                     boxes.append(box)
@@ -103,8 +103,8 @@ class YOLO_Pred():
             cv2.putText(image,str(ind),(x,y-10),cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,0),1)
         cv2.imwrite(filename='test_neightbours2.jpg',img=image)
 
-        df_predictions[['Width']] = df_predictions[['Width']]/x_factor
-        df_predictions[['Height']] = df_predictions[['Height']]/x_factor
+        df_predictions[['Width']] = df_predictions[['Width']]
+        df_predictions[['Height']] = df_predictions[['Height']]
             
         return df_predictions  #, index, boxes_np
 
