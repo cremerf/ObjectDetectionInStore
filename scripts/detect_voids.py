@@ -1,6 +1,7 @@
 from packages.yolo_predict import YOLO_Pred
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
+import numpy as np
 import cv2
 import multiprocessing
 from functools import partial
@@ -25,14 +26,14 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
     Y_center_0 = df_predictions.loc[index_it][1]
     Width_0 = df_predictions.loc[index_it][2]
     height_0 = df_predictions.loc[index_it][3]
-    threshold_x_0 = 0.8 * Width_0
-    threshold_y_0 = 0.8 * height_0
+    threshold_x_0 = 1 * Width_0
+    threshold_y_0 = 1 * height_0
 
     INPUT_WH_YOLO = 640
-    filter_1 = (df_predictions.loc[:, 'X_center'] < (X_center_0 + INPUT_WH_YOLO/8))
-    filter_2 = (df_predictions.loc[:, 'X_center'] > (X_center_0 - INPUT_WH_YOLO/8))
-    filter_3 = (df_predictions.loc[:, 'Y_center'] > (Y_center_0 - INPUT_WH_YOLO/8))
-    filter_4 = (df_predictions.loc[:, 'Y_center'] < (Y_center_0 + INPUT_WH_YOLO/8))
+    filter_1 = (df_predictions.loc[:, 'X_center'] < (X_center_0 + INPUT_WH_YOLO/2))
+    filter_2 = (df_predictions.loc[:, 'X_center'] > (X_center_0 - INPUT_WH_YOLO/2))
+    filter_3 = (df_predictions.loc[:, 'Y_center'] > (Y_center_0 - INPUT_WH_YOLO/2))
+    filter_4 = (df_predictions.loc[:, 'Y_center'] < (Y_center_0 + INPUT_WH_YOLO/2))
     filter_final = (filter_1 & filter_2) & (filter_3 & filter_4)
 
     df_predictions_final_2 = df_predictions[filter_final]
@@ -48,14 +49,14 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
 
         X_center_neightbour = df_predictions.loc[index_bb][0]
         Y_center_neightbour = df_predictions.loc[index_bb][1]
-        a = 4
-        k = 1.2
+        a = 2
+        k = 2
 
         ### Neightbor Left
         if neightbour == 'left':
             
-            x_min_l = X_center_0 - Width_0 - (a*threshold_x_0)
-            x_max_l = X_center_0 - Width_0 + (k*threshold_x_0)
+            x_min_l = X_center_0 - Width_0 - (a * threshold_x_0)
+            x_max_l = X_center_0 - Width_0 + (k * threshold_x_0)
 
             y_min_l = Y_center_0 - (k * threshold_y_0)
             y_max_l = Y_center_0 + (k * threshold_y_0)
@@ -88,7 +89,7 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
                     dict_of_neightbours[str(index_it)+'_r'].append(index_bb)
             else:
                 list_of_alones_r.append([index_it, index_bb])
-
+        '''
         ### Neightbor High
         else:
             x_min_h = X_center_0 - (k*threshold_x_0)
@@ -106,10 +107,19 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
                     dict_of_neightbours[str(index_it)+'_h'].append(index_bb)
             else:
                 list_of_alones_h.append([index_it, index_bb])
-
+            '''
+            
     return dict_of_neightbours
 
-def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: list, h_image:int, w_image:int):
+def image_mean(x:int, y:int, w:int, h:int, img_path:str) -> float:
+    
+    image = cv2.imread(img_path)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    roi = np.mean(gray[y:y + h, x:x + w])
+
+    return roi
+
+def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: list, h_image:int, w_image:int, img_path) -> list:
     """_summary_
 
     Args:
@@ -150,7 +160,7 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: lis
             h_index_a = df_predictions.loc[int(index_a)][3]
 
             
-            # Virtual bounding box to evaluate neightbours 
+            # Virtual bounding box to evaluate from neightbours 
             xA1 = df_predictions.loc[int(index_a)][0] - df_predictions.loc[int(index_a)][2]/2 + (k * w_index_a) # Para izquierda: (-1) / Para derecha: 1 / Para arriba: 0
             yA1 = df_predictions.loc[int(index_a)][1] - df_predictions.loc[int(index_a)][3]/2 + (z * h_index_a) # Para izquierda: 0 / Para derecha: 0 / Para arriba: (-1)
             xA2 = df_predictions.loc[int(index_a)][0] + df_predictions.loc[int(index_a)][2]/2 + (k * w_index_a) # Para izquierda: (-1) / Para derecha: 1 / Para arriba: 0
@@ -197,27 +207,67 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: lis
                         pass
                         #print(f'No hay espacio vacio a la izquierda de {index_a}')
                     else:
-                        print(f'A la izquierda de {index_a} hay espacio vacio')
-                        void_number += 1
-                        void_text = f'{index_a} void #{void_number}'
-                        first_list.append(index_a)
-                        first_list.append(void_text)
-                        first_list.append(xA1)
-                        first_list.append(yA1)
-                        first_list.append(xA2)
-                        first_list.append(yA2)
-                        first_list.append(w_index_a)
-                        first_list.append(h_index_a)
-                        list_of_voids.append(first_list)
-                    
+                        roi = image_mean(x= int(xA1),y= int(yA1),w= int(w_index_a), h= int(h_index_a), img_path= img_path)
+                        if roi < 50:
+                            print(f'A la izquierda de {index_a} hay espacio vacio')
+                            void_number += 1
+                            void_text = f'{index_a} void #{void_number}'
+                            first_list.append(index_a)
+                            first_list.append(void_text)
+                            first_list.append(xA1)
+                            first_list.append(yA1)
+                            first_list.append(xA2)
+                            first_list.append(yA2)
+                            first_list.append(w_index_a)
+                            first_list.append(h_index_a)
+                            list_of_voids.append(first_list)
+                        else:
+                            None
 
     return list_of_voids
 
-def df_voids():
+
+def get_df_voids():
     pass
 
 def plot_voids_from_df():
-    pass
+
+    #image_path_bb = os.path.join(folder_path_final, filename)
+
+    img_path = '/home/cremerf/FinalProject/scripts/test_neightbours2.jpg'
+    # load the image
+    image = cv2.imread(img_path)
+
+    # loop over indexes and for each index plot the rectangles
+    #for idx in df_voids.index:
+
+    # get the coordinates for each index/rectangle
+    for i in df_voids.index:
+        x1 = int(df_voids.loc[i][2]) 
+        y1 = int(df_voids.loc[i][3]) 
+        x2 = int(df_voids.loc[i][4])  
+        y2 = int(df_voids.loc[i][5])
+
+
+        # # Window name in which image is displayed
+        window_name = 'Object'
+        # represents the top left corner of rectangle
+        start_point=(x1, y1)
+
+        # represents the top right corner of rectangle
+        end_point=(x2,y2)
+
+        # # Blue color in BGR
+        color = (0, 0, 255)
+
+        # # Line thickness of 2 px
+        thickness = 5
+
+        # plot the rectangle over the image
+        image = cv2.rectangle(image, start_point, end_point, color, thickness)
+
+    # save the img
+    cv2.imwrite(filename='test_voids1.jpg', img=image)
 
 
 def run():
