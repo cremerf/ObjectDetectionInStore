@@ -128,7 +128,8 @@ dmypy.json
 .pyre/
 
 data_downloaded/
-data/
+data/labels
+data/images
 data_v1/
 data_bb/
 yolov5/

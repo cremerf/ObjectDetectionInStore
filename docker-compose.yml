@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   api:
-    image: flask_api # ver como cambiar a FastAPI (como dockerizar FastAPI)
+    image: fast_api
     container_name: ml_api
     build:
       context: ./api
@@ -9,25 +9,28 @@ services:
     ports:
       - "80:5000"
     environment:
-      - FLASK_APP=app
-      - FLASK_DEBUG=1
-      - FLASK_ENV=development
+      - API_SERVICE__MODE="prod"
     depends_on:
       - redis
       - model
     volumes:
-      - ./feedback:/src/feedback
-      - ./uploads:/src/static/uploads
+      - ./data:/home/src/data
+      - ./api:/home/src/api
 
   redis:
     image: redis:6.2.6
-
+    container_name: redis
+    
+    
   model:
     image: ml_service
+    container_name: model
     build:
       context: ./model
       target: build
     depends_on:
       - redis
     volumes:
-      - ./uploads:/src/uploads
+      - ./data:/home/src/data
+      - ./yolov5:/home/src/yolov5
+      - ./api:/home/src/api
