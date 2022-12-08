@@ -9,15 +9,29 @@ import itertools
 
 
 def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -> dict:
-    """_summary_
+    """
+    Identifies the neightbours of each predicted bounding box from a given image.
+    
+    Takes as parameter a dataframe which stores all the coords of the predicted bounding boxes.
+    Defines 4 filters to limit the spectrum to look for the neightbours. 
+    
+    Each filter is calculated from X_center/Y_center.
+
+    You have to specify which side(right or left) you want to evaluate. 
+
+    Returns a dictionary with key:pair values, where keys are the evaluted bounding box and the pair values are the neightbours of that key value.
+
+    This function is structured in a way to be suited for parallelizing. 
+    
+    The goal is to optimize times frames and resources to get the left/right neightbours as fast as possible
 
     Args:
-        df_predictions (pd.DataFrame): _description_
-        neightbour (str): _description_
+        df_predictions (pd.DataFrame): Dataframe with predicted bb obtained with Yolov5.
+        neightbour (str): Right or Left.
         index_it (int): _description_
 
     Returns:
-        dict: _description_
+        dict_of_neightbours: Bounding_box:BB_Neightbours
     """
 
     dict_of_neightbours = {} 
@@ -111,17 +125,32 @@ def image_mean(x:int, y:int, w:int, h:int, img_path:str) -> float:
     return roi
 
 def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: list, h_image:int, w_image:int, img_path) -> list:
-    """_summary_
+    """
+    Identifies empty spaces by evaluating each bounding box and it's neightbours. 
+
+    The heuristic of this function draws a "virtual" bounding box beside each bounding box and computes the IoU by iteration over it's neightbours.
+
+    IoU = Intersection over Union (shorturl.at/ituS0)
+
+    If all the calculated IoU (obtained from the neightbours) is less than 10% (0.1), it means that beside the evaluated bounding box, exists an empty space.
+
+    A conditional clause is added with h_image & w_image to avoid surpassing the boundiries of the image in each calculation and avoid irrelevant IoU's.
+
+    Moreover, with image_mean() we double-check the empty spaces. Some empty spaces are not "natural empty spaces", they are just columns or space from each shelf.
+
+    This empty spaces are avoided because do not represent empty *product* spaces.
+
+    Image_mean() returns a floating point value called "roi". Roi is the average pixel value of the a certain space. 
 
     Args:
-        df_predictions (pd.DataFrame): _description_
-        list_of_dicts (list): _description_
-        h_image (int): _description_
-        w_image (int): _description_
-        img_path (_type_): _description_
+        df_predictions (pd.DataFrame): Dataframe with predicted bb obtained with Yolov5.
+        list_of_dicts (list): Unified dicts as one list to iterate over. All left and right neightbours added.
+        h_image (int): Height of the image.
+        w_image (int): Width of the image.
+        img_path (_type_): Path to image to be predicted.
 
     Returns:
-        list: _description_
+        list: List of voids with label and coordinates.
     """
     
     list_of_voids = []
