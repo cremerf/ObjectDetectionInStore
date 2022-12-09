@@ -1,4 +1,5 @@
 from scripts.packages.yolo_predict import YOLO_Pred
+from scripts.packages.paths import ODISPaths 
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import numpy as np
@@ -9,8 +10,7 @@ import itertools
 import os
 from scripts.packages import settings
 
-
-
+PATHS = ODISPaths()
 
 def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -> dict:
     """
@@ -309,16 +309,28 @@ def plot_voids_from_df(img_path:str, df_voids: pd.DataFrame) -> None:
     # Refactor this with project paths
     cv2.imwrite(filename='test_voids1.jpg', img=image)
 
-
 def run(image_name):
+ 
+    # Instantiate the name of the folder's weights
 
-    #crear modulo con paths para weights + yaml 
+    training = 'first_training'
 
-    # Load model & YAML file
-    yolo = YOLO_Pred('/home/cremerf/FinalProject/data/weights/first_training/weights/bestnoft.onnx', '/home/cremerf/FinalProject/data/config_blmodel.yaml')
+    path_training = os.path.join(PATHS.WEIGHTS, training)
+
+    path_training_weights = os.path.join(path_training, 'weights')
+
+    name_of_weights = 'bestnoft.onnx'
+
+    path_picked_weights = os.path.join(path_training_weights, name_of_weights)
+
+    yaml_file = 'config_blmodel.yaml'
+
+    path_yaml = os.path.join(PATHS.DATA, yaml_file)
+
+    yolo = YOLO_Pred(path_picked_weights, path_yaml)
 
     # Como debe tomar el path para el ml_service?
-    img_path = os.path.join(settings.UPLOAD_FOLDER, image_name)
+    img_path = os.path.join(PATHS.UPLOAD_FOLDER, image_name)
     image = cv2.imread(img_path)
     h_image, w_image = image.shape[0:2]
     df_predictions = yolo.predictions(image=image)

@@ -1,21 +1,20 @@
 # from api.redis import settings
 from scripts.main_detect import main
-from dotenv import load_dotenv
 import numpy as np
 import yaml
 import json
 import os
 import time
-import redis
+#import redis
 
 # Import modules
-import model.scripts.packages.settings as settings
+import scripts.packages.settings as settings
 
 # Connect to Redis and assign to variable `db``
 # Make use of settings.py module to get Redis settings like host, port, etc.
-db = redis.Redis(host=settings.REDIS_IP,
-                 port=settings.REDIS_PORT,
-                 db=settings.REDIS_DB_ID)
+#db = redis.Redis(host=settings.REDIS_IP,
+                 #port=settings.REDIS_PORT,
+                 #db=settings.REDIS_DB_ID)
 
 
 def predict_process():
@@ -55,4 +54,4 @@ def predict_process():
 if __name__ == "__main__":
     # Now launch process
     print("Launching ML service...")
-    predict_process()
+    main('val_587.jpg')
