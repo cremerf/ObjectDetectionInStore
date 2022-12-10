@@ -267,28 +267,49 @@ def get_df_voids(list_of_dicts_n:list, df_predictions:pd.DataFrame, h_image:int,
 
     return df_voids
 
-def plot_voids_from_df(img_path:str, df_voids: pd.DataFrame) -> None:
+def plot_voids_from_df(image_name:str, df_predictions: pd.DataFrame, df_voids: pd.DataFrame) -> None:
     """_summary_
 
     Args:
         img_path (str): _description_
         df_voids (pd.DataFrame): _description_
     """
+        # load the image
 
-    #image_path_bb = os.path.join(folder_path_final, filename)
+    img_path = os.path.join(PATHS.UPLOAD_FOLDER, image_name)
 
-    # Refactor this with project paths
-    img_path = '/home/cremerf/FinalProject/test_neightbours2.jpg'
-
-    # load the image
     image = cv2.imread(img_path)
 
-    # get the coordinates for each index/rectangle
+    for i in df_predictions.iterrows():
+        # extract bounding box
+        x1 = int(i[1]['X_center']) - int(i[1]['Width'] / 2)
+        x2 = int(i[1]['X_center']) + int(i[1]['Width'] / 2)
+        y1 = int(i[1]['Y_center']) - int(i[1]['Height'] / 2)
+        y2 = int(i[1]['Y_center']) + int(i[1]['Height'] / 2)
+
+        start_point=(x1, y1)
+
+        # represents the top right corner of rectangle
+        end_point=(x2,y2)
+
+        # # Blue color in BGR
+        color = (0, 255, 0)
+
+        # # Line thickness of 5 px
+        thickness = 5
+
+        # plot the rectangle over the image
+
+        image = cv2.rectangle(image, start_point, end_point, color, thickness)
+
     for i in df_voids.index:
         x1 = int(df_voids.loc[i][2]) 
         y1 = int(df_voids.loc[i][3]) 
         x2 = int(df_voids.loc[i][4])  
         y2 = int(df_voids.loc[i][5])
+
+        width = int(df_voids.loc[i][6]/2) 
+        height = int(df_voids.loc[i][7]) 
 
         # represents the top left corner of rectangle
         start_point=(x1, y1)
@@ -296,21 +317,23 @@ def plot_voids_from_df(img_path:str, df_voids: pd.DataFrame) -> None:
         # represents the top right corner of rectangle
         end_point=(x2,y2)
 
-        # # Blue color in BGR
+        # # Red color in BGR
         color = (0, 0, 255)
 
         # # Line thickness of 5 px
         thickness = 5
 
-        cv2.putText(image,df_voids.loc[i][1],(x1,y1),cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,0),1)
+        cv2.rectangle(image, (x1, y1-37),(x2,y2), color, thickness)
+        cv2.putText(image, df_voids.loc[i][1], (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3)
         # plot the rectangle over the image
-        image = cv2.rectangle(image, start_point, end_point, color, thickness)
+        cv2.rectangle(image, start_point, end_point, color, thickness)
 
-    # Refactor this with project paths
-    cv2.imwrite(filename='test_voids1.jpg', img=image)
+    prediction_path = os.path.join(PATHS.PREDICTIONS, image_name)
+
+    cv2.imwrite(filename= prediction_path, img=image)
 
 def run(image_name):
- 
+
     # Instantiate the name of the folder's weights
 
     training = 'first_training'
@@ -362,7 +385,7 @@ def run(image_name):
     df_voids = get_df_voids(list_of_dicts_n= list_of_dicts_n, df_predictions= df_predictions, h_image= h_image, w_image= w_image, img_path=img_path)
 
     # Plot voids on image (esta hardcodeado el path pero hay que definir donde van a alojarse todas las imagenes con las predicciones)
-    plot_voids_from_df(img_path=img_path, df_voids= df_voids)
+    plot_voids_from_df(image_name= image_name, df_predictions= df_predictions, df_voids= df_voids)
 
 def main_detect_voids(image_name):
     run(image_name)

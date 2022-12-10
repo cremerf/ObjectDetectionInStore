@@ -14,7 +14,6 @@ class ODISPaths():
         # Upload folder, where the user's images are going to be uploaded
         self.UPLOAD_FOLDER = os.path.join(self.DATA, 'uploads') 
 
-
         self.PREDICTIONS = os.path.join(self.DATA, 'predictions') 
 
         self.WEIGHTS = os.path.join(self.DATA, 'weights') 

@@ -101,12 +101,12 @@ class YOLO_Pred():
             cv2.rectangle(image,(x,y-30),(x+w,y),colors,-1)
 
             cv2.putText(image,str(ind),(x,y-10),cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,0),1)
-        cv2.imwrite(filename='test_neightbours2.jpg',img=image)
+        #cv2.imwrite(filename='test_neightbours2.jpg',img=image)
 
         df_predictions[['Width']] = df_predictions[['Width']]
         df_predictions[['Height']] = df_predictions[['Height']]
             
-        return df_predictions  #, index, boxes_np
+        return df_predictions
 
     def generate_colors(self,ID):
         np.random.seed(10)

@@ -54,4 +54,4 @@ def predict_process():
 if __name__ == "__main__":
     # Now launch process
     print("Launching ML service...")
-    main('val_587.jpg')
+    main('train_4.jpg')
