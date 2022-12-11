@@ -12,13 +12,13 @@ RUN pip install aiofiles
 RUN pip install python-multipart
 
 # Set python path
-ENV PYTHONPATH=$PYTHONPATH:/home/src/
+ENV PYTHONPATH=$PYTHONPATH:/home
 
 # Set workdir
-WORKDIR /home/src
+WORKDIR /home
 
 # Copy info inside 
-ADD . /home/src/api/
+ADD . /home/api
 
 # FROM base as test
 # RUN ["pytest", "-v", "/src/tests"]

@@ -52,8 +52,7 @@ def model_predict(image_name):
         
         if output:
             output = json.loads(output.decode("utf-8"))
-            prediction = output["prediction"]
-            score = output["score"]
+            status = output["status"]
 
             # After we extract the prediction, score we have to delete the id
             db.delete(job_id)
@@ -64,4 +63,4 @@ def model_predict(image_name):
         # Sleep some time waiting for model results
         time.sleep(settings.API_SLEEP)
 
-    return prediction, score
+    return status

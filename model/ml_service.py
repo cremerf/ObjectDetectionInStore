@@ -39,10 +39,10 @@ def predict_process():
         job_id = job["id"]
 
         #   2. Run your ML model on the given data
-        prediction, score = main(image_name)
+        status = main(image_name)
 
         #   3. Store model prediction in a dict with the following shape:
-        rpse = { "prediction": str(prediction), "score": str(score)}
+        rpse = {"status": str(status)}
 
         #   4. Store the results on Redis using the original job ID as the key
         db.set(job_id, json.dumps(rpse))

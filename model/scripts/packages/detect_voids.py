@@ -1,6 +1,5 @@
 from scripts.packages.yolo_predict import YOLO_Pred
 from scripts.packages.paths import ODISPaths 
-from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import numpy as np
 import cv2
@@ -384,6 +383,8 @@ def run(image_name):
 
     # Plot voids predictions and detected objects on image
     plot_voids_from_df(image_name= image_name, df_predictions= df_predictions, df_voids= df_voids)
+
+    return True
 
 def main_detect_voids(image_name):
     run(image_name)

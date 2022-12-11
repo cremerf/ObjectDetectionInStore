@@ -14,8 +14,8 @@ services:
       - redis
       - model
     volumes:
-      - ./data:/home/src/data
-      - ./api:/home/src/api
+      - ./data:/home/data
+      - ./api:/home/api
 
   redis:
     image: redis:6.2.6
@@ -31,6 +31,6 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./data:/home/src/data
-      - ./yolov5:/home/src/yolov5
-      - ./api:/home/src/api
+      - ./data:/home/data
+      - ./yolov5:/home/yolov5
+      - ./api:/home/api
