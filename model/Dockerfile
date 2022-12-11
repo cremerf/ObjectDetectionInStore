@@ -16,8 +16,8 @@ RUN apt-get -y update
 RUN apt-get -y install git
 
 # Add a non-root user
-RUN useradd -ms /bin/bash app
-USER app
+#RUN useradd -ms /bin/bash app
+#USER app
 
 # Setup some paths
 # Setup some paths
