@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src=
+
+        "../front/bootstrap-4.3.1-dist/js/jquery.min.js">
+    </script>
+    <script>
+        /*  ==========================================
+    SHOW UPLOADED IMAGE
+* ========================================== */
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            $('#imageResult')
+                .attr('src', e.target.result);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+$(function () {
+    $('#upload').on('change', function () {
+        readURL(input);
+    });
+});
+
+/*  ==========================================
+    SHOW UPLOADED IMAGE NAME
+* ========================================== */
+var input = document.getElementById( 'upload' );
+var infoArea = document.getElementById( 'upload-label' );
+
+input.addEventListener( 'change', showFileName );
+function showFileName( event ) {
+  var input = event.srcElement;
+  var fileName = input.files[0].name;
+  infoArea.textContent = 'File name: ' + fileName;
+}
+
+    </script>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>StockVision</title>
+        <link rel="icon" type="image/x-icon" href="../front/assets/favicon.ico" />
+        <!-- Font Awesome icons (free version)-->
+        <script src="../front/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="../front/css/varelavoundfont.css" rel="stylesheet" />
+        <link href="../front/css/nunitofont.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="../front/css/styles.css" rel="stylesheet" />
+    </head>
+    <body id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="#page-top">Start StockVision</a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                       <!-- <li class="nav-item"><a class="nav-link" href="#projects">Clients</a></li> -->
+                        <li class="nav-item"><a class="nav-link" href="#demo">Demo</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container px-4 px-lg-5 d-flex h-100 align-items-center justify-content-center">
+                <div class="d-flex justify-content-center">
+                    <div class="text-center">
+                        <h1 class="mx-auto my-0 text-uppercase">StockVision</h1>
+                        <h2 class="text-white-50 mx-auto mt-2 mb-5">A free App from where you can manage all your stock.</h2>
+                        <a class="btn btn-primary" href="#about">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- About-->
+        <section class="about-section text-center" id="about">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-lg-8">
+                        <h2 class="text-white mb-4">All your stock in your Hand!</h2>
+                        <p class="text-white-50">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.                             
+                        </p>
+                    </div>
+                </div>
+                <img class="img-fluid" src="../front/assets/img/ipad-vendida-de-humo.png" alt="..." />
+            </div>
+        </section>
+        <!-- Projects-->
+        <section class="projects-section bg-light" id="projects">
+            <!-- <div class="container px-4 px-lg-5">
+                <!-- Featured Project Row-->
+                <!-- <div class="row gx-0 mb-4 mb-lg-5 align-items-center">
+                    <div class="col-xl-8 col-lg-7"><img class="img-fluid mb-3 mb-lg-0" src="../front/assets/img/demo-0.jpg" alt="..." /></div>
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="featured-text text-center text-lg-left">
+                            <h4>Carrefour</h4>
+                            <p class="text-black-50 mb-0">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                        </div>
+                    </div>
+                </div>-->
+        
+        <!-- Demo-->
+        <section class="demo-section" id="demo">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5">
+                    <div class="col-md-10 col-lg-8 mx-auto text-center">
+                        <!--<i class="far fa-paper-plane fa-2x mb-2 text-white"></i>-->
+                        <i class="fas fa-camera fa-2x mb-2 text-white"></i>
+                        <h2 class="text-white mb-5">Updates your Stock Image!</h2>
+                        <div class="row py-4">
+                            <div class="col-lg-8 mx-auto">
+                                    <!-- method post-->
+                                <form method="post" action="/" enctype="multipart/form-data">
+                        
+                                    <!-- Upload image input-->
+                                    <div class="input-group mb-3 px-20 py-20 rounded-pill bg-white shadow-sm">
+                                        
+                                        <!-- button choice file-->
+                                        <input id="upload" type="file" name="image" onchange="readURL(this);" class="form-control border-0" style="display: none;" autocomplete="off" required>                                                          
+                                        <label id="upload-label" for="upload" class="font-weight-light text-muted">file</label>
+
+                                    <div class="input-group-append">                            
+                                        <label for="upload" class="btn btn-light m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Choosess file</small></label>
+                                        
+                                        <!-- button predict-->
+                                        <button class="btn-predict" id="predict" style="display:none"></button>
+                                        <label for="predict" class="btn btn-predict m-0 rounded-pill px-4"> <i class="fa fa-cloud-upload mr-2 text-muted"></i><small class="text-uppercase font-weight-bold text-muted">Predict</small></label>
+                                        <label id="upload-label" for="predict" class="font-weight-light text-muted">file</label>                                
+                                    </div>                        
+                                </form> 
+                            </div>
+                                <!-- Uploaded image area-->
+                                <p class="font-italic text-white text-center">The image uploaded will be rendered inside the box below.</p>
+                            <div class="image-area mt-4"><img id="imageResult" src=# alt="" class="img-fluid rounded shadow-sm mx-auto d-block">              
+                            
+                            </div>
+                            
+                            <div class="image-area mt-4"><img id="imagePloted" src={{imgpredict}} alt=""class="img-fluid rounded shadow-sm mx-auto d-block"></div>                           
+                        </div>                    
+
+                    </div>
+                </div>    
+                    </div>
+            </div>
+        </section>        
+        <!-- Team-->
+          <!-- Team-->
+          <section class="page-section bg-light" id="team">
+            <div class="container">
+                <div class="text-center">
+                    <h2 class="section-heading text-uppercase">Our Amazing Team</h2>
+                    <h3 class="section-subheading text-muted">............</h3>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/seba-cabrera-team1.jpg" alt="..." />
+                            <h4>Sebastian Cabrera</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Eudes Benitez Facebook Profile"><i class="fab fa-facebook-f"></i></a>                  
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/sebastian-martin-cabrera/" aria-label="Sebastian Cabrera LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/eudes-benitez-team1.jpg" alt="..." />
+                            <h4>Eudes Benitez</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Eudes Benitez Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/eudes-benitez/" aria-label="Eudes Benitez LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/federico-cremer-team1.jpg" alt="..." />
+                            <h4>Federico Cremer</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Federico Cremer Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/federico-cremer/" aria-label="Federico Cremer LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/fabio-alvarez-team1.jpg" alt="..." />
+                            <h4>Fabio Alvarez</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>                            
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Fabio Alvarez Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/fabioalvarezflorez/" aria-label="Fabio Alvarez LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/francisco-moreno-team1.jpg" alt="..." />
+                            <h4>Francisco Moreno Trlin</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Francisco Moreno Trlin Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/inovador/" aria-label="Francisco Moreno Trlin LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                   
+                    <div class="col-lg-4">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/paula-vergara-team1.jpg" alt="..." />
+                            <h4>Paula Vergara</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Paula Vergara Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/paula-vergaradc/" aria-label="Paula Vergara LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="team-member">
+                            <img class="mx-auto rounded-circle" src="../front/assets/img/team/javier-hernandez-team1.jpg" alt="..." />
+                            <h4>Javier Hernandez</h4>
+                            <p class="text-muted">Machine Learning Engineer</p>
+                            
+                            <a class="btn btn-dark btn-social mx-2" href="#!" aria-label="Javier Hernandez Facebook Profile"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/javier-hern%C3%A1ndez-47317593/" aria-label="Javier Hernandez LinkedIn Profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8 mx-auto text-center"><p class="large text-muted"></p></div>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-black small text-center text-white-50"><div class="container px-4 px-lg-5">Copyright &copy; StockVision 2022</div></footer>
+        <!-- Bootstrap core JS-->
+        <script src="../front/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="../front/js/scripts.js"></script>
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <!-- * *                               SB Forms JS                               * *-->
+        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <script src="../front/bootstrap-4.3.1-dist/js/sb-forms-0.4.1.js"></script>
+    </body>
+</html>

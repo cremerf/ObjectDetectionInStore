@@ -8,7 +8,6 @@ import multiprocessing
 from functools import partial
 import itertools
 import os
-from scripts.packages import settings
 
 PATHS = ODISPaths()
 
@@ -32,7 +31,7 @@ def get_neightbours(df_predictions:pd.DataFrame, neightbour:str, index_it:int) -
     Args:
         df_predictions (pd.DataFrame): Dataframe with predicted bb obtained with Yolov5.
         neightbour (str): Right or Left.
-        index_it (int): _description_
+        index_it (int): Iterable.
 
     Returns:
         dict_of_neightbours: Bounding_box:BB_Neightbours
@@ -118,7 +117,7 @@ def image_mean(x:int, y:int, w:int, h:int, img_path:str) -> float:
         h (int): _description_
         img_path (str): _description_
 
-        
+
 
     Returns:
         roi (float): _description_

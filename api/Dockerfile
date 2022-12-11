@@ -8,6 +8,8 @@ COPY requirements.txt .
 
 # Install requirements
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN pip install aiofiles
+RUN pip install python-multipart
 
 # Set python path
 ENV PYTHONPATH=$PYTHONPATH:/home/src/
