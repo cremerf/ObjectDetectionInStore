@@ -118,8 +118,10 @@ def image_mean(x:int, y:int, w:int, h:int, img_path:str) -> float:
         h (int): _description_
         img_path (str): _description_
 
+        
+
     Returns:
-        float: _description_
+        roi (float): _description_
     """
     
     image = cv2.imread(img_path)
@@ -156,7 +158,6 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: lis
     Returns:
         list: List of voids with label and coordinates.
     """
-    
     list_of_voids = []
 
     # Translation of the virtual bounding box. Left = -1 / Right = +1 
@@ -242,19 +243,19 @@ def search_voids_bb_neightbours(df_predictions: pd.DataFrame, list_of_dicts: lis
     return list_of_voids
 
 def get_df_voids(list_of_dicts_n:list, df_predictions:pd.DataFrame, h_image:int, w_image:int, img_path:str) -> pd.DataFrame:
-    """_summary_
+    """
+    Get dataframe with empty spaces's coordinates, labels, width and height.
 
     Args:
-        list_of_dicts_n (list): _description_
-        df_predictions (pd.DataFrame): _description_
-        h_image (int): _description_
-        w_image (int): _description_
-        img_path (str): _description_
+        list_of_dicts_n (list): List of dicts with bounding box and it's neightbours as pair values. Unified as one list to iterate over.
+        df_predictions (pd.DataFrame): Dataframe with predicted bb obtained with Yolov5.
+        h_image (int): Height of the image.
+        w_image (int): Width of the image.
+        img_path (str): Path to the image.
 
     Returns:
-        pd.DataFrame: _description_
+        df_voids: Dataframe with predicted voids spaces
     """
-
 
     # List of dicts(left/right/high) into 1 list
     list_neightbours = list(itertools.chain.from_iterable(list_of_dicts_n))
@@ -268,14 +269,16 @@ def get_df_voids(list_of_dicts_n:list, df_predictions:pd.DataFrame, h_image:int,
     return df_voids
 
 def plot_voids_from_df(image_name:str, df_predictions: pd.DataFrame, df_voids: pd.DataFrame) -> None:
-    """_summary_
+    """
+    Plot voids (and predicted objects) on image.
 
     Args:
-        img_path (str): _description_
-        df_voids (pd.DataFrame): _description_
+        image_name (str): Name of the image.
+        df_predictions (pd.DataFrame): Dataframe with predicted bb (objects) obtained with Yolov5.
+        df_voids (pd.DataFrame): Dataframe with predicted voids spaces.
     """
-        # load the image
 
+    # load the image
     img_path = os.path.join(PATHS.UPLOAD_FOLDER, image_name)
 
     image = cv2.imread(img_path)
@@ -307,9 +310,6 @@ def plot_voids_from_df(image_name:str, df_predictions: pd.DataFrame, df_voids: p
         y1 = int(df_voids.loc[i][3]) 
         x2 = int(df_voids.loc[i][4])  
         y2 = int(df_voids.loc[i][5])
-
-        width = int(df_voids.loc[i][6]/2) 
-        height = int(df_voids.loc[i][7]) 
 
         # represents the top left corner of rectangle
         start_point=(x1, y1)
@@ -352,7 +352,6 @@ def run(image_name):
 
     yolo = YOLO_Pred(path_picked_weights, path_yaml)
 
-    # Como debe tomar el path para el ml_service?
     img_path = os.path.join(PATHS.UPLOAD_FOLDER, image_name)
     image = cv2.imread(img_path)
     h_image, w_image = image.shape[0:2]
@@ -378,13 +377,13 @@ def run(image_name):
 
     dict_of_neightbours_right = list(filter(None, dict_of_neightbours_right))
 
-    # Merged 3 separated 
+    # Merged dictionaries into 1 list of dictionaries
     list_of_dicts_n = [dict_of_neightbours_left, dict_of_neightbours_right]
 
     # Create dataframe with data(X_center/Y_center/Label) of voids
     df_voids = get_df_voids(list_of_dicts_n= list_of_dicts_n, df_predictions= df_predictions, h_image= h_image, w_image= w_image, img_path=img_path)
 
-    # Plot voids on image (esta hardcodeado el path pero hay que definir donde van a alojarse todas las imagenes con las predicciones)
+    # Plot voids predictions and detected objects on image
     plot_voids_from_df(image_name= image_name, df_predictions= df_predictions, df_voids= df_voids)
 
 def main_detect_voids(image_name):
