@@ -86,11 +86,7 @@ async def image(request:Request, response:Response, image: UploadFile = File(...
 
         # 1. Get an unique file name using utils.get_file_hash() function
         # Create full path to save image
-        #hashed_name = get_file_hash(file_name)
-
-        file_bytes = await image.read()
-
-        hashed_name = hashlib.sha256(file_bytes).hexdigest()
+        hashed_name = get_file_hash(image.file, file_name)
 
         save_path = os.path.join(PATHS.UPLOAD_FOLDER, hashed_name)
 

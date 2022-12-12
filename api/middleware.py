@@ -29,8 +29,6 @@ def model_predict(image_name):
         Model predicted class as a string and the corresponding confidence
         score as a number.
     """
-    prediction = None
-    score = None
 
     # Assign an unique ID for this job and add it to the queue.
     # We need to assing this ID because we must be able to keep track

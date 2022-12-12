@@ -16,7 +16,6 @@ db = redis.Redis(host=settings.REDIS_IP,
                 port=settings.REDIS_PORT,
                 db=settings.REDIS_DB_ID)
 
-
 def predict_process():
     """
     Loop indefinitely asking Redis for new jobs.
@@ -54,4 +53,3 @@ def predict_process():
 if __name__ == "__main__":
     # Now launch process
     predict_process()
-    
