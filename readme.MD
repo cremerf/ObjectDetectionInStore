@@ -59,3 +59,6 @@ python3 train.py --img 416 --batch 4 --epochs 5 \
     --data /home/src/app/config_blmodel.yaml \
     --weights yolov5s.pt --cache --project /home/src/data \
     --name first_training
+
+
+sudo chmod 777 -R predictions/

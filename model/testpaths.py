@@ -24,9 +24,6 @@ name_of_weights = 'bestnoft.onnx'
 
 path_picked_weights = os.path.join(path_training_weights, name_of_weights)
 
-
-
-
 training = 'first_training'
 
 path_training = os.path.join(PATHS.WEIGHTS, training)
@@ -43,7 +40,7 @@ path_yaml = os.path.join(PATHS.DATA, yaml_file)
 
 
 
-print(data_folder)
+print(PATHS.BASE_DIR)
 print(PATHS.WEIGHTS)
 print(path_training)
 print(path_training_weights)

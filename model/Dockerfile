@@ -16,12 +16,12 @@ RUN apt-get -y update
 RUN apt-get -y install git
 
 # Add a non-root user
-#RUN useradd -ms /bin/bash app
-#USER app
+RUN useradd -ms /bin/bash app
+USER app
 
 # Setup some paths
 # Setup some paths
-ENV PYTHONPATH=/home/app/.local/lib/python3.8/site-packages:/home/model
+ENV PYTHONPATH=/home/app/.local/lib/python3.8/site-packages:/home/src
 ENV PATH=$PATH:/home/app/.local/bin
 
 # Install the python packages for this new user
@@ -32,10 +32,10 @@ RUN pip3 install -r requirements.txt
 RUN pip3 install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 # Copy info inside 
-ADD . /home/model
+ADD . /home/src
 
 # Create working directory
-WORKDIR /home/model
+WORKDIR /home/src
 
 # Avoid problems with yolov5 clone
 # RUN git config --global --add safe.directory /home/src/yolov5
@@ -47,6 +47,6 @@ WORKDIR /home/model
 # RUN ["pytest", "-v", "/src/tests"]
 
 FROM base as build
-CMD ["python3", "/home/model/ml_service.py"]
+CMD ["python3", "/home/src/ml_service.py"]
 
 ## -------------------------------------------------------------------------------------------------------
