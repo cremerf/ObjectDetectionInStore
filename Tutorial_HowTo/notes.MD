@@ -1,15 +1,3 @@
-1) create .env with AWS credentials and secret in root folder
-
-2) create data folder
-
-    2.1) create notebook folder and save notebook there
-
-3) exceute code to download dataset from S3
-
-3) create folders:
-
-    2.1) api / model / tests / upload / stress_test
-
 ## Run docker
 
 # Build image from folder
@@ -20,7 +8,6 @@ sudo gpasswd -a $cremerf docker
 
 ## Build container in AWS with image running
 
-
 docker run --rm --net host --gpus all -it \
     -v /home/cremerf/FinalProject/training:/home/src/app \
     -v /home/eudesz/final_project/data:/home/src/dataset \
@@ -28,10 +15,6 @@ docker run --rm --net host --gpus all -it \
     --workdir /home/src \
     preparation_fc \
     bash
-
-
-
-
 
 ## Build container in Local with image running
 
